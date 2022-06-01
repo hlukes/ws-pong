@@ -28,13 +28,13 @@ const gI = {
 }
 
 socket.on('hello', function(data){  
-    if (socket.id == data.sid) {
         gI.bx = data.bx;
         gI.by = data.by;
         gI.uy = data.uy;
         gI.cy = data.cy;
-        paint(fI,gI)
-    }
+        paint(fI,gI);
+        console.log('received hello')
+
 
 });
 
@@ -82,7 +82,7 @@ function handleJoinRoom () {
     console.log("join room clicked");
     const inputRoom = document.getElementById('RoomInputTxt').value;
     socket.emit('joinRequest', inputRoom);
-    console.log('sent')
+    console.log('sent');
 }
 
 

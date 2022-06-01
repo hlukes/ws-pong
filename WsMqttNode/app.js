@@ -47,17 +47,33 @@ io.on("connection", (client) => {
     console.log(io.engine.clientsCount);
     idd = client.id;
     data.sid = idd;
-    function updateGame(idd) {
+    function updateGame(data,room) {
         if (data.bx < fI.width) {
             data.bx = data.bx + 4;
         }
         else {
             data.bx = 0;
         }
-        io.to(idd).emit('hello',data)
+        io.to(room).emit('hello',data)
+        //console.log(room);
     };
-    client.on('joinRequest', function (data) {
-        console.log(data);
+    client.on('joinRequest', function (room) {
+        if (clientRooms[room]) {
+            if (clientRooms[room]['1'] && !(clientRooms[room]['2'])) {
+                clientRooms[room][2] = client.id;
+                indRooms[client.id] = room;
+                client.join(room.toString());
+                io.to(client.id).emit('joinOk',room);
+                client.emit('roomAssigned',room);
+                console.log(io.sockets.adapter.rooms)
+                clientRooms[room]['gameInterval'] = setInterval(function (){updateGame(data,room)},1000);
+            }
+            else {
+                io.to(client.id).emit('joinNok',room);
+            }
+        }
+        
+
 
     });
     
@@ -75,15 +91,17 @@ io.on("connection", (client) => {
         };
         indRooms[client.id] = rid;
         client.emit('roomAssigned',rid);
+        const room = rid;
+        client.join(room.toString());
         console.log(rid);
         console.log(clientRooms);
         console.log(indRooms);
-
+        //clientRooms[rid]['code'] = setInterval(function(){console.log("interval TRIGERRRRED")},2000);
+        //console.log(clientRooms[rid]['code']);
 
     });
     
     state['xd'] = initGame();
-    
     
     console.log(state);
     console.log(`${idd} connected`);
@@ -93,7 +111,7 @@ io.on("connection", (client) => {
         console.log(`${idd} disconnected`);
         console.log(io.engine.clientsCount);
     });
-    const gameInterval = setInterval( function() { updateGame(idd); }, 1000/20 );
+    //const gameInterval = setInterval( function() { updateGame(idd); }, 1000/20 );
 });
 
 
